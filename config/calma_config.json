@@ -1,0 +1,25 @@
+{
+    "email_user": "email@gmail.com",
+    "email_pass": "xxxx xxxx xxxx xxxx",
+    "email_server": "imap.gmail.com",
+    "email_port": 993,
+    "max_file_size": 10485760,
+    "scan_timeout": 300,
+    "hash_algorithm": "sha256",
+    "enable_metadata": true,
+    "keep_logs_days": 7,
+    "cron_enabled": true,
+    "cron_interval": 3,
+    "cron_interval_unit": "hours",
+    "require_vm": true,
+    "vm_warning_only": false,
+    "labels": {
+        "clean": "Clean",
+        "infected": "Infected",
+        "suspicious": "Suspicious"
+    },
+    "virustotal_api_key": "api_key",
+    "virustotal_enabled": true,
+    "virustotal_timeout": 300,
+    "fallback_to_local": true
+}

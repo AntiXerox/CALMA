@@ -1,0 +1,2582 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CALMA SOC</title>
+    <link rel="icon" type="image/png" href="../assets/calmasime.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff0000;
+            --success: #00ff00;
+            --text: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border: rgba(255, 0, 0, 0.3);
+            --border-subtle: rgba(255, 0, 0, 0.2);
+            --bg: #000000;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            font-size: 14px;
+            letter-spacing: 0.03em;
+        }
+
+        /* Layout Principal */
+        #app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 0, 0, 0.03);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .assets-image {
+            height: 60px;
+            width: auto;
+            max-width: 200px;
+        }
+
+        .assets-section p {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin: 0;
+            margin-top: 8px;
+        }
+
+        .header-status {
+            text-align: right;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .header-status-value {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .header-status div {
+            margin: 4px 0;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        nav button {
+            padding: 16px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover {
+            color: var(--text);
+        }
+
+        nav button.active {
+            color: var(--text);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.7fr 1.3fr;
+            gap: 24px;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        /* Left Panel - Metrics */
+        aside {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .metric-card {
+            border: 1px solid var(--border);
+            padding: 20px;
+            background: rgba(255, 0, 0, 0.03);
+            text-align: center;
+        }
+
+        .metric-card.highlight {
+            border: 2px solid var(--primary);
+            background: rgba(255, 0, 0, 0.08);
+        }
+
+        .metric-label {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: var(--text);
+        }
+
+        /* Center Panel - Live Log */
+        .log-section {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            background: rgba(255, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .log-section h2 {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            margin: 0;
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .log-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.3;
+            max-height: 700px;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+            line-height: 1.4;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            margin-right: 8px;
+            font-size: 10px;
+        }
+
+        .log-file {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .log-status {
+            color: var(--text-secondary);
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .log-success {
+            color: var(--success);
+        }
+        
+        .log-warning {
+            color: #ffaa00;
+        }
+
+        /* Right Panel - Detonations */
+        .detonations-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            overflow-y: auto;
+            max-height: 700px;
+        }
+
+        .detonations-section h2 {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .detonation-card {
+            border: 1px solid var(--border);
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 0, 0, 0.03);
+            font-size: 9px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.3;
+        }
+
+        .detonation-card.malicious {
+            border: 2px solid var(--primary);
+            background: rgba(255, 0, 0, 0.08);
+        }
+
+        .detonation-card.suspicious {
+            border-color: #ffaa00;
+        }
+
+        .detonation-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .detonation-name {
+            color: var(--text-secondary);
+            font-size: 8px;
+            flex: 1;
+            min-width: 50%;
+            word-break: break-word;
+        }
+
+        .detonation-verdict {
+            font-weight: 600;
+            font-size: 9px;
+            white-space: nowrap;
+        }
+
+        .detonation-verdict.malicious {
+            color: var(--primary);
+        }
+
+        .detonation-verdict.suspicious {
+            color: #ffaa00;
+        }
+
+        .detonation-verdict.clean {
+            color: var(--success);
+        }
+
+        .detonation-info {
+            color: var(--text-secondary);
+            line-height: 1.3;
+            font-size: 8px;
+        }
+
+        .detonation-info div {
+            margin: 2px 0;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 16px 24px;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-align: center;
+            color: var(--text-secondary);
+            background: rgba(255, 0, 0, 0.03);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-secondary);
+            border-radius: 0;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text);
+        }
+
+        /* Content Tabs */
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: contents;
+        }
+
+        /* Config Section */
+        .config-content {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .config-section {
+            border: 1px solid var(--border);
+            padding: 24px;
+            background: rgba(255, 0, 0, 0.03);
+        }
+
+        .config-section h3 {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            margin-top: 0;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 0, 0, 0.02);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group select option {
+            background: #000000;
+            color: var(--text);
+            padding: 10px;
+        }
+        
+        .form-group small {
+            color: var(--text-secondary);
+            font-size: 9px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            border-color: var(--text-secondary);
+        }
+
+        button.btn-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        button.btn-primary:hover {
+            border-color: var(--primary);
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        button.btn-success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        button.btn-success:hover {
+            border-color: var(--success);
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        /* Monitoring & Logs Full Width */
+        .monitoring-content,
+        .logs-content {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .stat-card {
+            border: 1px solid var(--border);
+            padding: 20px;
+            background: rgba(255, 0, 0, 0.03);
+            text-align: center;
+        }
+
+        .stat-card.infected {
+            border: 2px solid var(--primary);
+            background: rgba(255, 0, 0, 0.08);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .logs-container {
+            border: 1px solid var(--border);
+            padding: 16px;
+            background: rgba(255, 0, 0, 0.03);
+            max-height: none;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.3;
+        }
+
+        .log-line {
+            margin-bottom: 6px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .log-error {
+            color: var(--primary);
+        }
+
+        .log-success {
+            color: var(--success);
+        }
+        
+        .log-warning {
+            color: #ffaa00;
+        }
+        
+        .log-phase {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Flying assets Animation - Paper Airplane */
+        .flying-assets {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.2;
+            transform: scaleX(-1);
+        }
+
+        .flying-assets-1 {
+            animation: paperFly1 30s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), paperWobble 2s infinite ease-in-out;
+        }
+
+        .flying-assets-2 {
+            animation: paperFly2 35s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), paperWobble 2.3s infinite ease-in-out;
+            animation-delay: -10s;
+        }
+
+        .flying-assets-3 {
+            animation: paperFly3 28s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), paperWobble 1.8s infinite ease-in-out;
+            animation-delay: -20s;
+        }
+
+        @keyframes paperFly1 {
+            0% {
+                top: 20%;
+                left: -10%;
+                transform: scaleX(-1) rotate(-15deg);
+            }
+            15% {
+                top: 30%;
+                left: 25%;
+                transform: scaleX(-1) rotate(5deg);
+            }
+            30% {
+                top: 15%;
+                left: 50%;
+                transform: scaleX(-1) rotate(-10deg);
+            }
+            45% {
+                top: 35%;
+                left: 75%;
+                transform: scaleX(-1) rotate(8deg);
+            }
+            60% {
+                top: 60%;
+                left: 85%;
+                transform: scaleX(-1) rotate(25deg);
+            }
+            75% {
+                top: 70%;
+                left: 50%;
+                transform: scaleX(-1) rotate(-5deg);
+            }
+            90% {
+                top: 45%;
+                left: 15%;
+                transform: scaleX(-1) rotate(-20deg);
+            }
+            100% {
+                top: 20%;
+                left: -10%;
+                transform: scaleX(-1) rotate(-15deg);
+            }
+        }
+
+        @keyframes paperFly2 {
+            0% {
+                top: 60%;
+                left: -10%;
+                transform: scaleX(-1) rotate(10deg);
+            }
+            20% {
+                top: 40%;
+                left: 30%;
+                transform: scaleX(-1) rotate(-8deg);
+            }
+            40% {
+                top: 25%;
+                left: 60%;
+                transform: scaleX(-1) rotate(12deg);
+            }
+            60% {
+                top: 45%;
+                left: 90%;
+                transform: scaleX(-1) rotate(-15deg);
+            }
+            80% {
+                top: 70%;
+                left: 40%;
+                transform: scaleX(-1) rotate(5deg);
+            }
+            100% {
+                top: 60%;
+                left: -10%;
+                transform: scaleX(-1) rotate(10deg);
+            }
+        }
+
+        @keyframes paperFly3 {
+            0% {
+                top: 40%;
+                left: 110%;
+                transform: scaleX(-1) rotate(-12deg);
+            }
+            25% {
+                top: 20%;
+                left: 70%;
+                transform: scaleX(-1) rotate(8deg);
+            }
+            50% {
+                top: 50%;
+                left: 40%;
+                transform: scaleX(-1) rotate(-18deg);
+            }
+            75% {
+                top: 65%;
+                left: 10%;
+                transform: scaleX(-1) rotate(15deg);
+            }
+            100% {
+                top: 40%;
+                left: 110%;
+                transform: scaleX(-1) rotate(-12deg);
+            }
+        }
+
+        @keyframes paperWobble {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg) scaleX(-1);
+            }
+            25% {
+                transform: translateY(-5px) rotate(2deg) scaleX(-1);
+            }
+            50% {
+                transform: translateY(3px) rotate(-1deg) scaleX(-1);
+            }
+            75% {
+                transform: translateY(-3px) rotate(1deg) scaleX(-1);
+            }
+        }
+
+        /* Clean Emails Styles */
+        .clean-emails-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .clean-emails-info p {
+            font-size: 12px;
+            color: var(--success);
+            margin: 0;
+        }
+
+        .clean-emails-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .clean-email-item {
+            border: 1px solid var(--border);
+            padding: 15px;
+            background: rgba(0, 255, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .clean-email-item:hover {
+            border-color: var(--success);
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .email-loading {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+            padding: 20px;
+        }
+
+        .email-filename {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .email-details {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin: 4px 0;
+        }
+
+        .email-details strong {
+            color: var(--text);
+        }
+
+        .email-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        .email-meta-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            main {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            aside,
+            .log-section,
+            .detonations-section {
+                max-height: 50vh;
+            }
+        }
+
+        /* Easter Egg Page */
+        #easterEggPage {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #easterEggPage.active {
+            display: flex;
+        }
+
+        #easterEggPage .flying-assets {
+            opacity: 0.6;
+            width: 120px;
+            height: 120px;
+            pointer-events: auto;
+            cursor: grab;
+            transition: opacity 0.2s ease;
+        }
+
+        #easterEggPage .flying-assets:hover {
+            opacity: 0.8;
+        }
+
+        #easterEggPage .flying-assets.dragging {
+            cursor: grabbing;
+            opacity: 0.9;
+            z-index: 10001;
+            animation: none !important;
+        }
+
+        #easterEggPage .flying-assets.restoring {
+            transition: all 1.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px 40px;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        }
+
+        .spawn-button {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            background: transparent;
+            border: 2px solid var(--success);
+            color: var(--success);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+
+        .spawn-button:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+
+        .controls-info {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            color: #666666;
+            font-size: 11px;
+            text-align: right;
+            line-height: 1.6;
+            z-index: 10000;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.02em;
+        }
+
+        .controls-info div {
+            margin: 4px 0;
+        }
+
+        .assets-image {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .assets-image:hover {
+            transform: scale(1.05);
+        }
+
+        /* City Background */
+        #easterEggPage .city-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            background: linear-gradient(to bottom, #000000 0%, #1a1a1a 100%);
+        }
+
+        .city-layer {
+            position: absolute;
+            bottom: 0;
+            width: 200%;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .city-layer-1 {
+            animation: cityMove1 60s linear infinite;
+            opacity: 0.15;
+        }
+
+        .city-layer-2 {
+            animation: cityMove2 40s linear infinite;
+            opacity: 0.1;
+            height: 80%;
+        }
+
+        .city-layer-3 {
+            animation: cityMove3 25s linear infinite;
+            opacity: 0.08;
+            height: 60%;
+        }
+
+        .building {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+
+        @keyframes cityMove1 {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes cityMove2 {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes cityMove3 {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Onboarding Section */
+        .onboarding-content {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 24px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .onboarding-airplanes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .onboarding-airplanes .flying-assets {
+            opacity: 0.15;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .summary-card {
+            border: 2px solid var(--border);
+            padding: 24px;
+            background: rgba(255, 0, 0, 0.03);
+        }
+
+        .summary-card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .summary-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .summary-stat-label {
+            color: var(--text-secondary);
+        }
+
+        .summary-stat-value {
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        .log-summary {
+            border: 2px solid var(--border);
+            padding: 20px;
+            background: rgba(255, 0, 0, 0.03);
+            position: relative;
+            z-index: 1;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-summary h3 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .vm-warning-banner {
+            display: none;
+            border: 1px solid #ffaa00;
+            background: rgba(255, 170, 0, 0.08);
+            color: #ffaa00;
+            padding: 12px 24px;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply accessibility settings immediately to prevent flash
+        (function() {
+            try {
+                const settings = JSON.parse(localStorage.getItem('accessibility_settings') || '{}');
+                if (settings.theme) document.body.setAttribute('data-theme', settings.theme);
+                if (settings.fontSize) document.body.setAttribute('data-font-size', settings.fontSize);
+                if (settings.reduceMotion !== undefined) document.body.setAttribute('data-reduce-motion', String(settings.reduceMotion));
+            } catch (e) {
+                console.error('Error loading accessibility settings:', e);
+            }
+        })();
+    </script>
+    <!-- Easter Egg Page -->
+    <div id="easterEggPage">
+        <div class="city-background">
+            <div class="city-layer city-layer-1" id="cityLayer1"></div>
+            <div class="city-layer city-layer-2" id="cityLayer2"></div>
+            <div class="city-layer city-layer-3" id="cityLayer3"></div>
+        </div>
+        <img src="../assets/calmasime.png" alt="Flying assets" class="flying-assets flying-assets-1">
+        <img src="../assets/calmasime.png" alt="Flying assets" class="flying-assets flying-assets-2">
+        <img src="../assets/calmasime.png" alt="Flying assets" class="flying-assets flying-assets-3">
+        <button class="spawn-button" onclick="spawnNewPlane()">+ Spawn Plane</button>
+        <button class="back-button" onclick="hideEasterEgg()">Go Back</button>
+        <div class="controls-info">
+            <div>Drag: Hold & Move</div>
+            <div>Throw: Release</div>
+            <div>Freeze: Shift + Release</div>
+            <div>Return to Flight: Right-Click</div>
+        </div>
+    </div>
+
+    <div id="app">
+        <header>
+            <div class="header-left">
+                <div class="assets-section">
+                    <img src="../assets/calma.png" alt="CALMA assets" class="assets-image" onclick="showEasterEgg()">
+                </div>
+            </div>
+            <div class="header-status">
+                <div>Status: <span class="header-status-value" id="statusValue">Idle</span></div>
+                <div>Last Update: <span id="lastUpdate">--:--:--</span></div>
+            </div>
+        </header>
+
+        <div id="vmWarningBanner" class="vm-warning-banner"></div>
+
+        <nav>
+            <button class="nav-btn active" data-tab="onboarding">Overview</button>
+            <button class="nav-btn" data-tab="dashboard">Dashboard</button>
+            <button class="nav-btn" data-tab="config">Configuration</button>
+            <button class="nav-btn" data-tab="monitoring">Monitoring</button>
+            <button class="nav-btn" data-tab="logs">Logs</button>
+            <button class="nav-btn" data-tab="clean-emails">Clean Emails</button>
+        </nav>
+
+        <main>
+            <div id="dashboard" class="content">
+                <aside>
+                    <div class="metric-card">
+                        <div class="metric-label">Emails Today</div>
+                        <div class="metric-value" id="emailsToday">0</div>
+                    </div>
+                    <div class="metric-card highlight">
+                        <div class="metric-label">Malicious Files</div>
+                        <div class="metric-value" id="maliciousFiles">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Clean Files</div>
+                        <div class="metric-value" id="cleanFiles">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Sandbox Queue</div>
+                        <div class="metric-value" id="queueSize">0</div>
+                    </div>
+                </aside>
+
+                <section class="log-section">
+                    <h2>Live Analysis Log</h2>
+                    <div class="log-content" id="liveLog">
+                        <div class="log-entry">
+                            <span class="log-status">Carregando eventos...</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="detonations-section">
+                    <h2>Recent Detonations</h2>
+                    <div id="detonationsList">
+                        <div class="detonation-card">
+                            <div class="detonation-header">
+                                <span class="detonation-name">Carregando...</span>
+                            </div>
+                            <div class="detonation-info">
+                                <div>Nenhuma análise recente</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="onboarding" class="content active">
+                <div class="onboarding-content">
+                    <div class="onboarding-airplanes">
+                        <img src="../assets/calmasime.png" alt="Flying assets" class="flying-assets flying-assets-1">
+                        <img src="../assets/calmasime.png" alt="Flying assets" class="flying-assets flying-assets-2">
+                        <img src="../assets/calmasime.png" alt="Flying assets" class="flying-assets flying-assets-3">
+                    </div>
+                    
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <h3>System Status</h3>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Status:</span>
+                                <span class="summary-stat-value" id="summaryStatus">Idle</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Uptime:</span>
+                                <span class="summary-stat-value" id="summaryUptime">--</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Cron Enabled:</span>
+                                <span class="summary-stat-value" id="summaryCron">No</span>
+                            </div>
+                        </div>
+
+                        <div class="summary-card">
+                            <h3>Analysis Summary</h3>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Total Analyzed:</span>
+                                <span class="summary-stat-value" id="summaryTotal">0</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Clean Files:</span>
+                                <span class="summary-stat-value" id="summaryClean">0</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Malicious Files:</span>
+                                <span class="summary-stat-value" id="summaryMalicious">0</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Suspicious Files:</span>
+                                <span class="summary-stat-value" id="summarySuspicious">0</span>
+                            </div>
+                        </div>
+
+                        <div class="summary-card">
+                            <h3>Recent Activity</h3>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Queue Size:</span>
+                                <span class="summary-stat-value" id="summaryQueue">0</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Last Analysis:</span>
+                                <span class="summary-stat-value" id="summaryLastAnalysis">--</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-label">Detection Rate:</span>
+                                <span class="summary-stat-value" id="summaryDetectionRate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="log-summary">
+                        <h3>Recent Log Summary</h3>
+                        <div id="logSummaryContent">
+                            <div class="log-line">Loading recent activity...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="config" class="content">
+                <div class="config-content">
+                    <div class="config-section">
+                        <h3>Email Settings</h3>
+                        <div class="form-group">
+                            <label for="emailUser">Email Address</label>
+                            <input type="email" id="emailUser" placeholder="your.email@gmail.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="emailPass">App Password</label>
+                            <input type="password" id="emailPass" placeholder="xxxx xxxx xxxx xxxx">
+                        </div>
+                        <div class="form-group">
+                            <label for="emailServer">IMAP Server</label>
+                            <input type="text" id="emailServer" value="imap.gmail.com">
+                        </div>
+                        <button onclick="testConnection()" class="btn-primary">Test Connection</button>
+                        <div id="testResult" style="margin-top: 12px; font-size: 11px; color: var(--text-secondary);"></div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3>Gmail Labels</h3>
+                        <div class="form-group">
+                            <label for="labelClean">Clean Files Label</label>
+                            <input type="text" id="labelClean" placeholder="LIMPOS">
+                        </div>
+                        <div class="form-group">
+                            <label for="labelInfected">Infected Label</label>
+                            <input type="text" id="labelInfected" placeholder="INFETADOS">
+                        </div>
+                        <div class="form-group">
+                            <label for="labelSuspicious">Suspicious Label</label>
+                            <input type="text" id="labelSuspicious" placeholder="SUSPEITOS">
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3>Cron Schedule</h3>
+                        
+                        <div class="form-group">
+                            <label>Interval Type</label>
+                            <select id="cronIntervalUnit" onchange="updateCronPreview()">
+                                <option value="seconds">Every X Seconds</option>
+                                <option value="minutes" selected>Every X Minutes</option>
+                                <option value="hours">Every X Hours</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cronIntervalValue">Interval Value</label>
+                            <input type="number" id="cronIntervalValue" min="1" max="59" value="5" maxlength="2" onchange="updateCronPreview()" oninput="if(this.value.length > 2) { this.value = this.value.slice(0,2); } const maxVal = parseInt(this.max); const val = parseInt(this.value); if(val > maxVal) { this.value = maxVal; } updateCronPreview();">
+                            <small style="color: var(--text-secondary); font-size: 9px; margin-top: 4px; display: block;">
+                                <span id="cronRangeInfo">1-59 minutes</span>
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label style="color: var(--success);">Preview</label>
+                            <div style="padding: 12px; border: 1px solid var(--border); background: rgba(0, 255, 0, 0.02); color: var(--success); font-family: 'Courier New', monospace; font-size: 10px; word-break: break-all;">
+                                <div id="cronPreviewText">Every 5 minutes</div>
+                                <div style="font-size: 9px; color: var(--text-secondary); margin-top: 8px;">
+                                    <span id="cronCronExpression"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cronEnabled">Enable Cron</label>
+                            <select id="cronEnabled">
+                                <option value="false">Disabled</option>
+                                <option value="true">Enabled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3>Advanced Settings</h3>
+                        <div class="form-group">
+                            <label for="maxFileSize">Max File Size (bytes)</label>
+                            <input type="number" id="maxFileSize" value="10485760">
+                        </div>
+                        <div class="form-group">
+                            <label for="scanTimeout">Scan Timeout (seconds)</label>
+                            <input type="number" id="scanTimeout" value="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="logRetention">Keep Logs (days)</label>
+                            <input type="number" id="logRetention" value="7">
+                        </div>
+                        <div class="form-group">
+                            <label for="requireVm">Require Virtual Machine</label>
+                            <select id="requireVm">
+                                <option value="false">Disabled</option>
+                                <option value="true">Enabled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vmWarningOnly">VM Warning Only</label>
+                            <select id="vmWarningOnly">
+                                <option value="true">Warn Only</option>
+                                <option value="false">Block Execution</option>
+                            </select>
+                            <small>When VM is required, choose warn or block.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 24px;">
+                    <div class="button-group">
+                        <button onclick="saveConfig()" class="btn-success">Save Configuration</button>
+                        <button onclick="loadConfig()">Reload</button>
+                    </div>
+                    <div id="configMessage" style="margin-top: 16px; font-size: 11px; color: var(--text-secondary);"></div>
+                </div>
+            </div>
+
+            <div id="monitoring" class="content">
+                <div class="monitoring-content">
+                    <div style="display: flex; gap: 12px;">
+                        <button onclick="startMonitoring()" class="btn-primary">Start Monitoring</button>
+                        <button onclick="stopMonitoring()">Stop</button>
+                        <button onclick="clearOldLogs()">Clear Old Logs</button>
+                    </div>
+
+                    <div>
+                        <h3 style="font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;">Live Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">Clean Files</div>
+                                <div class="stat-value" id="monClean">0</div>
+                            </div>
+                            <div class="stat-card infected">
+                                <div class="stat-label">Infected Files</div>
+                                <div class="stat-value" id="monInfected">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Suspicious Files</div>
+                                <div class="stat-value" id="monSuspicious">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Pending Files</div>
+                                <div class="stat-value" id="monPending">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 24px;">
+                        <h3 style="font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;">Recent Analyses Summary</h3>
+                        <div id="analysesListMonitoring" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                            <div style="border: 1px solid var(--border); padding: 12px; text-align: center; color: var(--text-secondary); font-size: 11px;">
+                                Loading analyses...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="logs" class="content">
+                <div class="logs-content">
+                    <button onclick="refreshLogs()" class="btn-primary">Refresh Logs</button>
+                    <div class="logs-container" id="logsContainer">
+                        <div class="log-line log-status">Loading system logs...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clean-emails" class="content">
+                <div class="config-content">
+                    <div class="config-section">
+                        <h2>Clean Emails</h2>
+                        <div class="clean-emails-info">
+                            <p>Total Clean Emails: <span id="cleanEmailsCount">0</span></p>
+                        </div>
+                        <div id="cleanEmailsList" class="clean-emails-list">
+                            <div class="clean-email-item">
+                                <div class="email-loading">Carregando emails limpos...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 24px;">
+                <div>CALMA - Chaos Engine for Email Threat Analysis</div>
+                <div id="footerStats" style="font-size: 9px; opacity: 0.7;">
+                    <span id="footerClean"></span> Clean |
+                    <span id="footerInfected"></span> Infected |
+                    <span id="footerSuspicious"></span> Suspicious
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let currentTab = 'dashboard';
+        let monitoringActive = false;
+        let monitoringInterval = null;
+
+        // Easter Egg Functions
+        let draggedPlane = null;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let mouseVelocityX = 0;
+        let mouseVelocityY = 0;
+        let currentRotation = 0;
+        let shiftPressed = false;
+
+        function showEasterEgg() {
+            const easterEgg = document.getElementById('easterEggPage');
+            easterEgg.classList.add('active');
+            
+            // Disable context menu in easter egg page
+            easterEgg.addEventListener('contextmenu', (e) => {
+                // Only prevent if not releasing a plane (plane release handler will prevent its own)
+                if (!draggedPlane) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Enable dragging for easter egg planes
+            const planes = easterEgg.querySelectorAll('.flying-assets');
+            planes.forEach(plane => {
+                plane.addEventListener('mousedown', startDrag);
+            });
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function hideEasterEgg() {
+            const easterEgg = document.getElementById('easterEggPage');
+            easterEgg.classList.remove('active');
+            
+            // Clean up event listeners
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        function spawnNewPlane() {
+            const easterEgg = document.getElementById('easterEggPage');
+            const existingPlanes = easterEgg.querySelectorAll('.flying-assets');
+            
+            // Check limit of 10 planes
+            if (existingPlanes.length >= 10) {
+                alert('Maximum of 10 planes reached!');
+                return;
+            }
+            
+            const newPlane = document.createElement('img');
+            newPlane.src = '../assets/calmasime.png';
+            newPlane.alt = 'Flying assets';
+            newPlane.className = 'flying-assets';
+            
+            // Random starting position off-screen to fly in
+            const side = Math.floor(Math.random() * 4);
+            if (side === 0) { // left
+                newPlane.style.left = '-120px';
+                newPlane.style.top = Math.random() * window.innerHeight + 'px';
+            } else if (side === 1) { // right
+                newPlane.style.left = window.innerWidth + 'px';
+                newPlane.style.top = Math.random() * window.innerHeight + 'px';
+            } else if (side === 2) { // top
+                newPlane.style.left = Math.random() * window.innerWidth + 'px';
+                newPlane.style.top = '-120px';
+            } else { // bottom
+                newPlane.style.left = Math.random() * window.innerWidth + 'px';
+                newPlane.style.top = window.innerHeight + 'px';
+            }
+            
+            // Apply one of the existing flying animations randomly
+            const animations = ['paperFly1 30s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), paperWobble 2s infinite ease-in-out',
+                              'paperFly2 35s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), paperWobble 2.3s infinite ease-in-out',
+                              'paperFly3 28s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95), paperWobble 1.8s infinite ease-in-out'];
+            const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+            const randomDelay = -(Math.random() * 30); // Random start point in animation
+            
+            newPlane.style.animation = randomAnimation;
+            newPlane.style.animationDelay = randomDelay + 's';
+            
+            // Add drag functionality
+            newPlane.addEventListener('mousedown', startDrag);
+            
+            easterEgg.appendChild(newPlane);
+        }
+
+        function startDrag(e) {
+            draggedPlane = e.target;
+            
+            // Clear any active physics simulation for THIS plane
+            if (draggedPlane.physicsInterval) {
+                clearInterval(draggedPlane.physicsInterval);
+                draggedPlane.physicsInterval = null;
+            }
+            
+            // Get current computed position before stopping animation
+            const rect = draggedPlane.getBoundingClientRect();
+            const currentLeft = rect.left;
+            const currentTop = rect.top;
+            
+            // Stop animation and lock current position
+            draggedPlane.classList.add('dragging');
+            draggedPlane.style.left = currentLeft + 'px';
+            draggedPlane.style.top = currentTop + 'px';
+            
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            mouseVelocityX = 0;
+            mouseVelocityY = 0;
+            
+            // Get current rotation if it exists
+            const transform = window.getComputedStyle(draggedPlane).transform;
+            if (transform !== 'none') {
+                const values = transform.split('(')[1].split(')')[0].split(',');
+                const a = values[0];
+                const b = values[1];
+                currentRotation = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+            } else {
+                currentRotation = 0;
+            }
+            
+            // Add right-click listener to release plane back to animation
+            const releaseToFly = (rightClickEvent) => {
+                rightClickEvent.preventDefault();
+                rightClickEvent.stopPropagation();
+                
+                if (!draggedPlane) return;
+                
+                const planeToRelease = draggedPlane;
+                const startX = parseFloat(planeToRelease.style.left) || 0;
+                const startY = parseFloat(planeToRelease.style.top) || 0;
+                
+                // Clear draggedPlane first to prevent stopDrag from interfering
+                draggedPlane = null;
+                
+                // Clear any physics
+                if (planeToRelease.physicsInterval) {
+                    clearInterval(planeToRelease.physicsInterval);
+                    planeToRelease.physicsInterval = null;
+                }
+                
+                // Remove dragging state and frozen state
+                planeToRelease.classList.remove('dragging');
+                delete planeToRelease.dataset.frozen;
+                
+                // Add restoring class for smooth transition
+                planeToRelease.classList.add('restoring');
+                planeToRelease.style.animation = 'none';
+                
+                // Animate the restoration with acceleration
+                let progress = 0;
+                const duration = 1500; // 1.5 seconds
+                const startTime = Date.now();
+                
+                const animateRestore = () => {
+                    const elapsed = Date.now() - startTime;
+                    progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function for acceleration (starts slow, speeds up)
+                    const eased = progress * progress; // Quadratic ease-in
+                    
+                    // Rotate gradually to horizontal (no position change during restoration)
+                    const currentRotation = parseFloat(planeToRelease.style.transform?.match(/rotate\(([^)]+)deg\)/)?.[1] || 0);
+                    const targetRotation = -10; // Slight upward angle
+                    const rotation = currentRotation + (targetRotation - currentRotation) * progress;
+                    
+                    // Fade and restore opacity
+                    const opacity = 0.6 + (0.4 * progress); // From 0.6 to 1.0
+                    
+                    // Keep position at release point during restoration
+                    planeToRelease.style.left = startX + 'px';
+                    planeToRelease.style.top = startY + 'px';
+                    planeToRelease.style.transform = `scaleX(-1) rotate(${rotation}deg)`;
+                    planeToRelease.style.opacity = opacity;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateRestore);
+                    } else {
+                        // Wait one frame to ensure position is stable
+                        requestAnimationFrame(() => {
+                            // Animation complete, continue from exact current position
+                            const finalX = parseFloat(planeToRelease.style.left);
+                            const finalY = parseFloat(planeToRelease.style.top);
+                            
+                            // Remove restoring class
+                            planeToRelease.classList.remove('restoring');
+                            
+                            // Start gentle drifting physics from exact current position
+                            let driftVelX = 1 + Math.random() * 2; // Slow forward drift
+                            let driftVelY = (Math.random() - 0.5) * 0.5; // Gentle up/down wobble
+                            let driftX = finalX;
+                            let driftY = finalY;
+                            let driftRot = -10;
+                            
+                            planeToRelease.physicsInterval = setInterval(() => {
+                                // Gentle sine wave motion
+                                const time = Date.now() / 1000;
+                                driftVelY += Math.sin(time) * 0.02;
+                                driftRot = -10 + Math.sin(time * 0.5) * 5;
+                                
+                                driftX += driftVelX;
+                                driftY += driftVelY;
+                                
+                                // Wrap around screen
+                                const planeWidth = planeToRelease.offsetWidth;
+                                const planeHeight = planeToRelease.offsetHeight;
+                                
+                                if (driftX > window.innerWidth) {
+                                    driftX = -planeWidth;
+                                }
+                                if (driftX < -planeWidth) {
+                                    driftX = window.innerWidth;
+                                }
+                                if (driftY > window.innerHeight - planeHeight) {
+                                    driftY = window.innerHeight - planeHeight;
+                                    driftVelY = -Math.abs(driftVelY);
+                                }
+                                if (driftY < 0) {
+                                    driftY = 0;
+                                    driftVelY = Math.abs(driftVelY);
+                                }
+                                
+                                planeToRelease.style.left = driftX + 'px';
+                                planeToRelease.style.top = driftY + 'px';
+                                planeToRelease.style.transform = `scaleX(-1) rotate(${driftRot}deg)`;
+                                planeToRelease.style.opacity = '0.6';
+                            }, 16);
+                        });
+                    }
+                };
+                
+                requestAnimationFrame(animateRestore);
+                
+                // Clean up plane-specific listener
+                planeToRelease.removeEventListener('contextmenu', releaseToFly);
+            };
+            
+            draggedPlane.addEventListener('contextmenu', releaseToFly);
+            
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!draggedPlane) return;
+            
+            // Track shift key
+            shiftPressed = e.shiftKey;
+            
+            // Calculate velocity
+            mouseVelocityX = e.clientX - lastMouseX;
+            mouseVelocityY = e.clientY - lastMouseY;
+            
+            // Calculate rotation based on movement direction
+            const angle = Math.atan2(mouseVelocityY, mouseVelocityX) * (180 / Math.PI);
+            
+            // Smooth rotation transition
+            if (Math.abs(mouseVelocityX) > 1 || Math.abs(mouseVelocityY) > 1) {
+                currentRotation = angle;
+            }
+            
+            // Position the plane at cursor
+            const planeWidth = draggedPlane.offsetWidth;
+            const planeHeight = draggedPlane.offsetHeight;
+            
+            draggedPlane.style.left = (e.clientX - planeWidth / 2) + 'px';
+            draggedPlane.style.top = (e.clientY - planeHeight / 2) + 'px';
+            draggedPlane.style.transform = `scaleX(-1) rotate(${currentRotation}deg)`;
+            
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        }
+
+        function stopDrag(e) {
+            // Ignore right-click mouseup events (button 2)
+            if (e && e.button === 2) {
+                return;
+            }
+            
+            if (draggedPlane) {
+                // Keep the plane at its current position permanently
+                draggedPlane.style.animation = 'none';
+                draggedPlane.classList.remove('dragging');
+                
+                const thrownPlane = draggedPlane;
+                
+                draggedPlane = null;
+                
+                // If Shift was pressed, freeze the plane stationary (no physics)
+                if (shiftPressed) {
+                    // Mark plane as frozen and keep it grabbable
+                    thrownPlane.dataset.frozen = 'true';
+                    thrownPlane.style.opacity = '0.8';
+                    // Plane stays at current position, no physics
+                    return;
+                }
+                
+                // Remove frozen state if it was previously frozen
+                delete thrownPlane.dataset.frozen;
+                thrownPlane.style.opacity = '';
+                
+                // Start physics simulation with throw velocity
+                let velocityX = mouseVelocityX;
+                let velocityY = mouseVelocityY;
+                let rotation = currentRotation;
+                let currentX = parseFloat(thrownPlane.style.left);
+                let currentY = parseFloat(thrownPlane.style.top);
+                
+                // Only start physics if there's meaningful velocity
+                const initialSpeed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+                if (initialSpeed < 1) {
+                    // Not thrown, just dropped - no physics needed
+                    return;
+                }
+                
+                // Store physics simulation interval on the plane element itself
+                thrownPlane.physicsInterval = setInterval(() => {
+                    // Apply friction (air resistance)
+                    velocityX *= 0.95;
+                    velocityY *= 0.95;
+                    
+                    // Check if plane has stopped moving horizontally
+                    const speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+                    
+                    // Always apply gravity (not just when slowing down)
+                    velocityY += 0.3;
+                    
+                    // Update position
+                    currentX += velocityX;
+                    currentY += velocityY;
+                    
+                    // Update rotation to match velocity direction
+                    if (Math.abs(velocityX) > 0.5 || Math.abs(velocityY) > 0.5) {
+                        rotation = Math.atan2(velocityY, velocityX) * (180 / Math.PI);
+                    }
+                    
+                    // Check boundaries
+                    const planeWidth = thrownPlane.offsetWidth;
+                    const planeHeight = thrownPlane.offsetHeight;
+                    
+                    // Collision detection with other planes (including frozen ones)
+                    const easterEgg = document.getElementById('easterEggPage');
+                    const allPlanes = easterEgg.querySelectorAll('.flying-assets');
+                    allPlanes.forEach(otherPlane => {
+                        if (otherPlane === thrownPlane || otherPlane.classList.contains('dragging')) return;
+                        
+                        const otherRect = otherPlane.getBoundingClientRect();
+                        const thisRect = {
+                            left: currentX,
+                            top: currentY,
+                            right: currentX + planeWidth,
+                            bottom: currentY + planeHeight
+                        };
+                        
+                        // Check if planes are colliding
+                        if (thisRect.left < otherRect.right &&
+                            thisRect.right > otherRect.left &&
+                            thisRect.top < otherRect.bottom &&
+                            thisRect.bottom > otherRect.top) {
+                            
+                            // Collision detected - both planes drop
+                            velocityX *= 0.3; // Reduce horizontal velocity
+                            velocityY = Math.abs(velocityY) + 5; // Force downward velocity
+                            
+                            // If other plane is frozen, unfreeze it
+                            if (otherPlane.dataset.frozen === 'true') {
+                                delete otherPlane.dataset.frozen;
+                                otherPlane.style.opacity = '';
+                            }
+                            
+                            // Make the other plane drop too
+                            if (!otherPlane.physicsInterval) {
+                                // Start physics on the other plane if it doesn't have it
+                                const otherX = otherRect.left;
+                                const otherY = otherRect.top;
+                                let otherVelX = 0;
+                                let otherVelY = 5; // Initial drop velocity
+                                let otherRot = 0;
+                                
+                                otherPlane.style.animation = 'none';
+                                
+                                otherPlane.physicsInterval = setInterval(() => {
+                                    otherVelX *= 0.95;
+                                    otherVelY += 0.3; // Gravity
+                                    
+                                    const newX = parseFloat(otherPlane.style.left || otherX) + otherVelX;
+                                    let newY = parseFloat(otherPlane.style.top || otherY) + otherVelY;
+                                    
+                                    otherRot = Math.atan2(otherVelY, otherVelX) * (180 / Math.PI);
+                                    
+                                    // Check boundaries
+                                    if (newY >= window.innerHeight - planeHeight) {
+                                        newY = window.innerHeight - planeHeight;
+                                        otherVelY = -otherVelY * 0.6;
+                                        otherVelX *= 0.8;
+                                    }
+                                    
+                                    if (newY <= 0) {
+                                        newY = 0;
+                                        otherVelY = -otherVelY * 0.6;
+                                    }
+                                    
+                                    otherPlane.style.left = newX + 'px';
+                                    otherPlane.style.top = newY + 'px';
+                                    otherPlane.style.transform = `scaleX(-1) rotate(${otherRot}deg)`;
+                                }, 16);
+                            } else {
+                                // If it already has physics, just add downward velocity
+                                // This is harder to do cleanly, so we'll just affect the current plane
+                            }
+                        }
+                    });
+                    
+                    // Wrap around horizontally (left/right - no collision)
+                    if (currentX < -planeWidth) {
+                        currentX = window.innerWidth;
+                    } else if (currentX > window.innerWidth) {
+                        currentX = -planeWidth;
+                    }
+                    
+                    // Bounce on top and bottom (collision)
+                    if (currentY >= window.innerHeight - planeHeight) {
+                        // Hit the bottom - bounce
+                        currentY = window.innerHeight - planeHeight;
+                        
+                        // If bouncing very slowly, stop the physics
+                        if (Math.abs(velocityY) < 2 && Math.abs(velocityX) < 1) {
+                            clearInterval(thrownPlane.physicsInterval);
+                            thrownPlane.physicsInterval = null;
+                            thrownPlane.style.transform = `scaleX(-1) rotate(0deg)`;
+                            return;
+                        }
+                        
+                        velocityY = -velocityY * 0.6; // Reverse and reduce velocity
+                        velocityX *= 0.8; // Friction on bounce
+                    }
+                    
+                    if (currentY <= 0) {
+                        // Hit the top - bounce
+                        currentY = 0;
+                        velocityY = -velocityY * 0.6; // Reverse and reduce velocity
+                    }
+                    
+                    // Don't stop - keep physics running (removed stopping condition)
+                    
+                    // Apply new position and rotation
+                    thrownPlane.style.left = currentX + 'px';
+                    thrownPlane.style.top = currentY + 'px';
+                    thrownPlane.style.transform = `scaleX(-1) rotate(${rotation}deg)`;
+                    
+                }, 16); // ~60fps
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavigation();
+            loadConfig();
+            refreshDashboard();
+            refreshLogs();
+            loadRecentDetonations();
+            loadCleanEmails();
+            generateCity();
+            checkVmStatus(false);
+            
+            // Auto-refresh dashboard every 30 seconds
+            setInterval(refreshDashboard, 30000);
+            
+            // Auto-refresh logs every 15 seconds when in logs tab
+            setInterval(() => {
+                const activeTab = document.querySelector('nav button.active');
+                if (activeTab && activeTab.textContent.includes('Logs')) {
+                    refreshLogs();
+                }
+            }, 15000);
+        });
+
+        // Generate City Background
+        function generateCity() {
+            const layer1 = document.getElementById('cityLayer1');
+            const layer2 = document.getElementById('cityLayer2');
+            const layer3 = document.getElementById('cityLayer3');
+            
+            // Generate buildings for layer 1 (closest, tallest)
+            for (let i = 0; i < 40; i++) {
+                const building = document.createElement('div');
+                building.className = 'building';
+                const height = 200 + Math.random() * 300;
+                const width = 40 + Math.random() * 80;
+                building.style.width = width + 'px';
+                building.style.height = height + 'px';
+                layer1.appendChild(building);
+            }
+            
+            // Generate buildings for layer 2 (middle)
+            for (let i = 0; i < 35; i++) {
+                const building = document.createElement('div');
+                building.className = 'building';
+                const height = 150 + Math.random() * 200;
+                const width = 35 + Math.random() * 60;
+                building.style.width = width + 'px';
+                building.style.height = height + 'px';
+                layer2.appendChild(building);
+            }
+            
+            // Generate buildings for layer 3 (farthest, shortest)
+            for (let i = 0; i < 30; i++) {
+                const building = document.createElement('div');
+                building.className = 'building';
+                const height = 100 + Math.random() * 150;
+                const width = 30 + Math.random() * 50;
+                building.style.width = width + 'px';
+                building.style.height = height + 'px';
+                layer3.appendChild(building);
+            }
+        }
+
+        // Navigation
+        function setupNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.getAttribute('data-tab');
+                    switchTab(tab);
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            
+            // Load specific content for tabs
+            if (tabName === 'monitoring') {
+                loadAnalysesMonitoring();
+                refreshDashboard();
+            } else if (tabName === 'logs') {
+                refreshLogs();
+            } else if (tabName === 'clean-emails') {
+                loadCleanEmails();
+            }
+        }
+
+        // Load Configuration
+        async function loadConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/config`);
+                const config = await response.json();
+
+                document.getElementById('emailUser').value = config.email_user || '';
+                document.getElementById('emailPass').value = config.email_pass || '';
+                document.getElementById('emailServer').value = config.email_server || 'imap.gmail.com';
+                document.getElementById('labelClean').value = config.labels?.clean || 'LIMPOS';
+                document.getElementById('labelInfected').value = config.labels?.infected || 'INFETADOS';
+                document.getElementById('labelSuspicious').value = config.labels?.suspicious || 'SUSPEITOS';
+                
+                // Processar intervalo de cron - pode vir em diferentes formatos
+                const cronInterval = config.cron_interval || 5;
+                const cronUnit = config.cron_interval_unit || 'minutes';
+                
+                document.getElementById('cronIntervalValue').value = cronInterval;
+                document.getElementById('cronIntervalUnit').value = cronUnit;
+                
+                document.getElementById('cronEnabled').value = config.cron_enabled ? 'true' : 'false';
+                document.getElementById('maxFileSize').value = config.max_file_size || 10485760;
+                document.getElementById('scanTimeout').value = config.scan_timeout || 300;
+                document.getElementById('logRetention').value = config.keep_logs_days || 7;
+                document.getElementById('requireVm').value = config.require_vm ? 'true' : 'false';
+                document.getElementById('vmWarningOnly').value = config.vm_warning_only === false ? 'false' : 'true';
+                
+                // Atualizar preview
+                updateCronPreview();
+                checkVmStatus(false);
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+        
+        // Atualizar preview de cron e intervalo de valores
+        function updateCronPreview() {
+            const unit = document.getElementById('cronIntervalUnit').value;
+            const input = document.getElementById('cronIntervalValue');
+            const rangeInfo = document.getElementById('cronRangeInfo');
+            
+            // Atualizar range de acordo com a unidade
+            if (unit === 'seconds') {
+                input.max = '59';
+                rangeInfo.textContent = '1-59 seconds';
+            } else if (unit === 'minutes') {
+                input.max = '59';
+                rangeInfo.textContent = '1-59 minutes';
+            } else if (unit === 'hours') {
+                input.max = '23';
+                rangeInfo.textContent = '1-23 hours';
+            }
+            
+            // Validar valor
+            if (parseInt(input.value) > parseInt(input.max)) {
+                input.value = input.max;
+            }
+            if (parseInt(input.value) < 1) {
+                input.value = 1;
+            }
+            
+            // Get the corrected value after validation
+            const value = parseInt(input.value) || 1;
+            
+            // Atualizar preview textual
+            let previewText = '';
+            if (value === 1) {
+                previewText = `Every ${unit.slice(0, -1)}`; // "Every second/minute/hour"
+            } else {
+                previewText = `Every ${value} ${unit}`;
+            }
+            document.getElementById('cronPreviewText').textContent = previewText;
+            
+            // Gerar expressão cron (formato: "*/N * * * * *" para minutos, etc)
+            let cronExpr = '';
+            if (unit === 'seconds') {
+                cronExpr = `*/${value} * * * * *`; // A cada N segundos
+                cronExpr += ` (Every ${value} second${value > 1 ? 's' : ''})`;
+            } else if (unit === 'minutes') {
+                cronExpr = `*/${value} * * * *`; // A cada N minutos
+                cronExpr += ` (Every ${value} minute${value > 1 ? 's' : ''})`;
+            } else if (unit === 'hours') {
+                cronExpr = `0 */${value} * * *`; // A cada N horas
+                cronExpr += ` (Every ${value} hour${value > 1 ? 's' : ''})`;
+            }
+            document.getElementById('cronCronExpression').textContent = cronExpr;
+        }
+
+        // Save Configuration
+        async function saveConfig() {
+            const config = {
+                email_user: document.getElementById('emailUser').value,
+                email_pass: document.getElementById('emailPass').value,
+                email_server: document.getElementById('emailServer').value,
+                labels: {
+                    clean: document.getElementById('labelClean').value,
+                    infected: document.getElementById('labelInfected').value,
+                    suspicious: document.getElementById('labelSuspicious').value
+                },
+                cron_enabled: document.getElementById('cronEnabled').value === 'true',
+                cron_interval: parseInt(document.getElementById('cronIntervalValue').value),
+                cron_interval_unit: document.getElementById('cronIntervalUnit').value,
+                max_file_size: parseInt(document.getElementById('maxFileSize').value),
+                scan_timeout: parseInt(document.getElementById('scanTimeout').value),
+                keep_logs_days: parseInt(document.getElementById('logRetention').value),
+                require_vm: document.getElementById('requireVm').value === 'true',
+                vm_warning_only: document.getElementById('vmWarningOnly').value === 'true'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+                const result = await response.json();
+                const msgDiv = document.getElementById('configMessage');
+                msgDiv.textContent = result.success ? 'Configuration saved successfully' : 'Error saving configuration';
+                setTimeout(() => msgDiv.textContent = '', 3000);
+                checkVmStatus(false);
+            } catch (error) {
+                document.getElementById('configMessage').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function checkVmStatus(blockOnFailure) {
+            try {
+                const [vmResponse, configResponse] = await Promise.all([
+                    fetch(`${API_BASE}/vm-check`),
+                    fetch(`${API_BASE}/config`)
+                ]);
+
+                const vm = await vmResponse.json();
+                const config = await configResponse.json();
+
+                const requireVm = config.require_vm === true;
+                const warningOnly = config.vm_warning_only !== false;
+                const banner = document.getElementById('vmWarningBanner');
+
+                if (requireVm && !vm.safe) {
+                    if (banner) {
+                        banner.style.display = 'block';
+                        banner.textContent = `VM REQUIRED: ${vm.message || 'Virtual machine not detected'}`;
+                    }
+
+                    if (!warningOnly && blockOnFailure) {
+                        alert('Execução bloqueada: VM obrigatória não detectada.');
+                        return false;
+                    }
+
+                    if (warningOnly && blockOnFailure) {
+                        alert(`Aviso: ${vm.message || 'VM não detectada'}`);
+                    }
+                } else if (banner) {
+                    banner.style.display = 'none';
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error checking VM status:', error);
+                return true;
+            }
+        }
+
+        // Test Connection
+        async function testConnection() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.textContent = 'Testing connection...';
+
+            try {
+                const response = await fetch(`${API_BASE}/test-connection`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('emailUser').value,
+                        password: document.getElementById('emailPass').value
+                    })
+                });
+                const result = await response.json();
+                resultDiv.textContent = result.success ? 'Connection successful' : 'Connection failed: ' + result.message;
+                setTimeout(() => resultDiv.textContent = '', 3000);
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Refresh Dashboard
+        async function refreshDashboard() {
+            try {
+                const response = await fetch(`${API_BASE}/status`);
+                const data = await response.json();
+
+                const totalEmails = (data.stats?.clean || 0) + (data.stats?.infected || 0) + (data.stats?.suspicious || 0);
+                document.getElementById('emailsToday').textContent = totalEmails;
+                document.getElementById('maliciousFiles').textContent = data.stats?.infected || 0;
+                document.getElementById('cleanFiles').textContent = data.stats?.clean || 0;
+                document.getElementById('queueSize').textContent = data.stats?.pending || 0;
+
+                document.getElementById('monClean').textContent = data.stats?.clean || 0;
+                document.getElementById('monInfected').textContent = data.stats?.infected || 0;
+                document.getElementById('monSuspicious').textContent = data.stats?.suspicious || 0;
+                document.getElementById('monPending').textContent = data.stats?.pending || 0;
+                
+                // Atualizar footer
+                document.getElementById('footerClean').textContent = data.stats?.clean || 0;
+                document.getElementById('footerInfected').textContent = data.stats?.infected || 0;
+                document.getElementById('footerSuspicious').textContent = data.stats?.suspicious || 0;
+
+                const statusElement = document.getElementById('statusValue');
+                statusElement.textContent = data.cron_enabled ? 'Monitoring' : 'Idle';
+                statusElement.style.color = data.cron_enabled ? 'var(--success)' : 'var(--primary)';
+                
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                
+                // Load live logs
+                loadLiveLog();
+                loadRecentDetonations();
+            } catch (error) {
+                console.error('Error refreshing dashboard:', error);
+            }
+        }
+
+        // Load Live Log from API - Mostrar muito mais detalhes e eventos
+        async function loadLiveLog() {
+            try {
+                const response = await fetch(`${API_BASE}/logs?lines=800`);
+                const data = await response.json();
+                const logs = data.logs || [];
+                
+                console.log('Total logs received:', logs.length);
+                
+                // Filtrar eventos relevantes - expandir keywords significativamente
+                const relevantLogs = logs.filter(log => {
+                    const logLower = log.toLowerCase();
+                    const keywords = [
+                        'classificado',     // Classificações de arquivos
+                        'limpo', 'clean',   // Arquivos limpos
+                        'infetado', 'infected', // Arquivos maliciosos
+                        'suspeito', 'suspicious', // Arquivos suspeitos
+                        'score',            // Scores de análise
+                        'movido', 'moved', 'moving', // Movimentos de arquivos
+                        'success',          // Operações bem-sucedidas
+                        'anexo', 'attachment', 'extract', // Extração de anexos
+                        'email',            // Eventos de email
+                        'fase', 'phase',    // Fases de execução
+                        'iniciando', 'iniciado', 'starting',
+                        'análise', 'analysis',
+                        'extração', 'extraction',
+                        'encontrado',
+                        'processado', 'processed',
+                        'gerado', 'generated',
+                        'concluído', 'completed'
+                    ];
+                    return keywords.some(keyword => logLower.includes(keyword));
+                });
+                
+                console.log('Relevant logs found:', relevantLogs.length);
+                
+                // Mostrar últimas 35 entradas (aumentado de 25)
+                const entriesToShow = relevantLogs.slice(-35);
+                
+                const logHtml = entriesToShow.map((log, index) => {
+                    const isError = log.includes('INFETADO') || log.includes('INFECTED') || log.includes('[ERROR]');
+                    const isSuccess = log.includes('[SUCCESS]') || log.includes('LIMPO') || log.includes('Clean') || log.includes('Classificado');
+                    const isSuspicious = log.includes('SUSPEITO') || log.includes('Suspicious');
+                    const isPhase = log.includes('[PHASE]');
+                    
+                    let colorClass = 'log-status';
+                    if (isError) colorClass += ' log-file';
+                    else if (isSuccess) colorClass += ' log-success';
+                    else if (isSuspicious) colorClass += ' log-warning';
+                    
+                    // Destacar visualmente logs de classificação
+                    const borderStyle = isSuccess && log.includes('Classificado') 
+                        ? 'border-left: 3px solid var(--primary);' 
+                        : '';
+                    
+                    return `<div class="log-entry" style="padding-left: 12px; ${borderStyle}">
+                        <span class="${colorClass}">${escapeHtml(log)}</span>
+                    </div>`;
+                }).join('');
+
+                document.getElementById('liveLog').innerHTML = logHtml || '<div class="log-entry"><span class="log-status">Nenhum evento recente</span></div>';
+            } catch (error) {
+                console.error('Error loading live log:', error);
+                document.getElementById('liveLog').innerHTML = '<div class="log-entry"><span class="log-status">Erro ao carregar logs</span></div>';
+            }
+        }
+
+        // Load Recent Detonations - Versão melhorada com API estruturada
+        async function loadRecentDetonations() {
+            try {
+                // Primeira tentativa: usar a API estruturada de análises
+                let response = await fetch(`${API_BASE}/analyses?limit=50`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const analyses = data.analyses || [];
+                    
+                    console.log('Analyses from API:', analyses.length);
+                    
+                    if (analyses.length > 0) {
+                        const detonationsHtml = analyses.slice(-12).reverse().map(a => `
+                            <div class="detonation-card ${a.verdict === 'Malicious' ? 'malicious' : (a.verdict === 'Suspicious' ? 'suspicious' : '')}">
+                                <div class="detonation-header">
+                                    <span class="detonation-name">${escapeHtml(a.filename)}</span>
+                                    <span class="detonation-verdict ${a.verdict.toLowerCase()}">${a.verdict}</span>
+                                </div>
+                                <div class="detonation-info">
+                                    <div>Score: ${a.score}/100</div>
+                                    <div>Time: ${a.timestamp}</div>
+                                    <div>Status: ${a.status}</div>
+                                </div>
+                            </div>
+                        `).join('');
+
+                        document.getElementById('detonationsList').innerHTML = detonationsHtml;
+                        return;
+                    }
+                }
+                
+                // Fallback: parsear a partir dos logs
+                response = await fetch(`${API_BASE}/logs?lines=500`);
+                const data = await response.json();
+                const logs = data.logs || [];
+                
+                console.log('Total logs for detonations:', logs.length);
+                
+                // Parse detonation info from logs
+                const detonations = [];
+                logs.forEach(log => {
+                    if (log.includes('Classificado:')) {
+                        const isMalicious = log.includes('INFETADO');
+                        const isSuspicious = log.includes('SUSPEITO') && !log.includes('INFETADO');
+                        const verdict = isMalicious ? 'Malicious' : (isSuspicious ? 'Suspicious' : 'Clean');
+                        
+                        let nameMatch = log.match(/Classificado:\s*([^\s]+)/);
+                        if (!nameMatch) {
+                            nameMatch = log.match(/(\d{8}_\d{6}_\d+_[^\s\)]+)/);
+                        }
+                        const name = nameMatch ? nameMatch[1] : 'unknown';
+                        
+                        const scoreMatch = log.match(/Score:\s*(\d+)/);
+                        const score = scoreMatch ? scoreMatch[1] : '--';
+                        
+                        const timeMatch = log.match(/\[(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\]/);
+                        const timestamp = timeMatch ? timeMatch[1] : 'unknown';
+                        
+                        console.log('Found detonation:', {name, verdict, score, timestamp});
+                        
+                        detonations.push({
+                            name: name,
+                            verdict: verdict,
+                            score: score,
+                            timestamp: timestamp
+                        });
+                    }
+                });
+
+                console.log('Total detonations parsed:', detonations.length);
+
+                if (detonations.length === 0) {
+                    document.getElementById('detonationsList').innerHTML = '<div class="detonation-card"><div class="detonation-header"><span class="detonation-name">Aguardando análises...</span></div><div class="detonation-info"><div>Nenhuma detonação recente</div></div></div>';
+                    return;
+                }
+
+                const detonationsHtml = detonations.slice(-12).reverse().map(d => `
+                    <div class="detonation-card ${d.verdict === 'Malicious' ? 'malicious' : (d.verdict === 'Suspicious' ? 'suspicious' : '')}">
+                        <div class="detonation-header">
+                            <span class="detonation-name">${escapeHtml(d.name)}</span>
+                            <span class="detonation-verdict ${d.verdict.toLowerCase()}">${d.verdict}</span>
+                        </div>
+                        <div class="detonation-info">
+                            <div>Score: ${d.score}/100</div>
+                            <div>Time: ${d.timestamp}</div>
+                            <div>Status: ${d.verdict === 'Malicious' ? 'INFETADO' : (d.verdict === 'Suspicious' ? 'SUSPEITO' : 'LIMPO')}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('detonationsList').innerHTML = detonationsHtml;
+            } catch (error) {
+                console.error('Error loading detonations:', error);
+                document.getElementById('detonationsList').innerHTML = '<div class="detonation-card"><div class="detonation-header"><span class="detonation-name">Erro</span></div><div class="detonation-info"><div>Erro ao carregar detonações</div></div></div>';
+            }
+        }
+
+        async function loadCleanEmails() {
+            try {
+                const response = await fetch(`${API_BASE}/clean-emails?limit=100`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch clean emails');
+                }
+
+                const data = await response.json();
+                const cleanEmails = data.clean_emails || [];
+                const total = data.total || 0;
+
+                document.getElementById('cleanEmailsCount').textContent = total;
+
+                if (cleanEmails.length === 0) {
+                    document.getElementById('cleanEmailsList').innerHTML = '<div class="email-loading">Nenhum email limpo encontrado</div>';
+                    return;
+                }
+
+                const emailsHtml = cleanEmails.map(email => `
+                    <div class="clean-email-item">
+                        <div class="email-filename">📧 ${escapeHtml(email.filename)}</div>
+                        <div class="email-details">
+                            <strong>Sender:</strong> ${escapeHtml(email.sender)}
+                        </div>
+                        <div class="email-details">
+                            <strong>Subject:</strong> ${escapeHtml(email.subject)}
+                        </div>
+                        <div class="email-details">
+                            <strong>Score:</strong> ${email.score}/${email.max_score}
+                        </div>
+                        <div class="email-meta">
+                            <div class="email-meta-item">
+                                <span>Email ID:</span>
+                                <span>${escapeHtml(email.email_id)}</span>
+                            </div>
+                            <div class="email-meta-item">
+                                <span>Time:</span>
+                                <span>${escapeHtml(email.timestamp)}</span>
+                            </div>
+                            <div class="email-meta-item">
+                                <span>Origin:</span>
+                                <span>${escapeHtml(email.email_origin)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('cleanEmailsList').innerHTML = emailsHtml;
+            } catch (error) {
+                console.error('Error loading clean emails:', error);
+                document.getElementById('cleanEmailsList').innerHTML = '<div class="email-loading">Erro ao carregar emails limpos</div>';
+            }
+        }
+
+        async function startMonitoring() {
+            try {
+                const vmAllowed = await checkVmStatus(true);
+                if (!vmAllowed) {
+                    return;
+                }
+                const config = await fetch(`${API_BASE}/config`).then(r => r.json());
+                const interval = config.cron_interval || 5;
+                const unit = config.cron_interval_unit || 'minutes';
+                
+                const response = await fetch(`${API_BASE}/cron/enable`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        interval: interval,
+                        interval_unit: unit
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    monitoringActive = true;
+                    monitoringInterval = setInterval(() => {
+                        refreshDashboard();
+                    }, 3000);
+                    refreshDashboard();
+                    
+                    // Criar mensagem mais intuitiva
+                    let unitText = unit === 'seconds' ? 'segundo' : (unit === 'minutes' ? 'minuto' : 'hora');
+                    let intervalText = interval === 1 ? unitText : (interval + ' ' + unit);
+                    const warning = result.warning ? `\n${result.warning}` : '';
+                    alert('Monitoramento ativado com sucesso! Intervalo: A cada ' + intervalText + warning);
+                } else {
+                    alert('Erro ao ativar monitoramento: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error starting monitoring:', error);
+                alert('Erro ao iniciar monitoramento: ' + error.message);
+            }
+        }
+
+        async function stopMonitoring() {
+            try {
+                const response = await fetch(`${API_BASE}/cron/disable`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    monitoringActive = false;
+                    if (monitoringInterval) clearInterval(monitoringInterval);
+                    refreshDashboard();
+                    alert('Monitoramento desativado com sucesso!');
+                } else {
+                    alert('Erro ao desativar monitoramento: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error stopping monitoring:', error);
+                alert('Erro ao parar monitoramento: ' + error.message);
+            }
+        }
+
+        // Refresh Logs
+        async function refreshLogs() {
+            try {
+                const response = await fetch(`${API_BASE}/logs?lines=300`);
+                const data = await response.json();
+                const container = document.getElementById('logsContainer');
+                
+                if (!data.logs || data.logs.length === 0) {
+                    container.innerHTML = '<div class="log-line">No logs available</div>';
+                    return;
+                }
+                
+                const logsHtml = data.logs.map(log => {
+                    const isError = log.includes('[ERROR]') || log.includes('Error') || log.includes('INFETADO');
+                    const isSuccess = log.includes('[SUCCESS]') || log.includes('LIMPO') || log.includes('Clean');
+                    const isWarning = log.includes('SUSPEITO') || log.includes('[WARN]');
+                    const isPhase = log.includes('[PHASE]');
+                    
+                    let classes = 'log-line';
+                    if (isError) classes += ' log-error';
+                    else if (isSuccess) classes += ' log-success';
+                    else if (isWarning) classes += ' log-warning';
+                    else if (isPhase) classes += ' log-phase';
+                    
+                    return `<div class="${classes}">${escapeHtml(log)}</div>`;
+                }).join('');
+                
+                container.innerHTML = logsHtml;
+            } catch (error) {
+                document.getElementById('logsContainer').innerHTML = '<div class="log-line log-error">Error loading logs</div>';
+            }
+        }
+
+        // Clear Old Logs
+        async function clearOldLogs() {
+            try {
+                const response = await fetch(`${API_BASE}/logs/clear`, { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ days: 7 })
+                });
+                const data = await response.json();
+                alert(data.message || 'Logs antigos removidos com sucesso');
+                refreshLogs();
+            } catch (error) {
+                console.error('Error clearing logs:', error);
+                alert('Erro ao limpar logs');
+            }
+        }
+        
+        // Load Recent Analyses for Monitoring Tab
+        async function loadAnalysesMonitoring() {
+            try {
+                const response = await fetch(`${API_BASE}/analyses?limit=8`);
+                const data = await response.json();
+                const analyses = data.analyses || [];
+                
+                if (analyses.length === 0) {
+                    document.getElementById('analysesListMonitoring').innerHTML = 
+                        '<div style="grid-column: 1/-1; border: 1px solid var(--border); padding: 12px; text-align: center; color: var(--text-secondary); font-size: 11px;">No analyses yet</div>';
+                    return;
+                }
+                
+                const analysesHtml = analyses.reverse().map(a => {
+                    const verdictColor = a.verdict === 'Malicious' ? 'var(--primary)' : 
+                                         (a.verdict === 'Suspicious' ? '#ffaa00' : 'var(--success)');
+                    
+                    return `
+                        <div style="border: 1px solid var(--border); padding: 12px; border-left: 3px solid ${verdictColor};">
+                            <div style="color: ${verdictColor}; font-weight: 600; font-size: 10px; margin-bottom: 4px;">${a.verdict}</div>
+                            <div style="color: var(--text-secondary); font-size: 8px; word-break: break-word; margin-bottom: 4px;">${escapeHtml(a.filename)}</div>
+                            <div style="color: var(--text-secondary); font-size: 8px;">Score: ${a.score}/100</div>
+                            <div style="color: var(--text-secondary); font-size: 8px;">${a.timestamp}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('analysesListMonitoring').innerHTML = analysesHtml;
+            } catch (error) {
+                console.error('Error loading monitoring analyses:', error);
+            }
+        }
+
+        // Generate Mock Data
+        function generateMockData() {
+            // Data will be loaded from API in real-time
+            // No mock data needed - loaded on tab switch and dashboard refresh
+        }
+
+        // Utility
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
